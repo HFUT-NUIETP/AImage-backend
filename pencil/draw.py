@@ -11,7 +11,7 @@ parser.add_argument('--p', action='store_true', default=False,
 parser.add_argument('--c', action='store_true', default=False,
                     dest='c', help='for color pencil drawing')
 parser.add_argument('-img', dest='image', type=str, default='pencil/input/input.jpg',
-                    help="input image path, default is 'img/sjtu.jpg'.")
+                    help="input image path, default is 'pencil/input/input.jpg'.")
 parser.add_argument('-s', dest="gammaS", type=float, default=1,
                     help='Larger when you want the line of strokes darker, default value is 1.')
 parser.add_argument('-i', dest='gammaI', type=float, default=1,
