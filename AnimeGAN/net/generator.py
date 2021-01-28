@@ -1,4 +1,4 @@
-from tools.ops import *
+from AnimeGAN.tools.ops import *
 import tensorflow as tf
 
 

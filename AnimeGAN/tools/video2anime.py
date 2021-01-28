@@ -17,7 +17,7 @@ from net import generator
 from tools.utils import preprocessing, check_folder
 from tools.adjust_brightness import adjust_brightness_from_src_to_dst
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 def parse_args():
     desc = "Tensorflow implementation of AnimeGAN"
@@ -62,7 +62,7 @@ def cvt2anime_video(video, output, checkpoint_dir, output_format='MP4V', img_siz
     # check_folder(result_dir)
     gpu_stat = bool(len(tf.config.experimental.list_physical_devices('GPU')))
     if gpu_stat:
-        os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
     gpu_options = tf.compat.v1.GPUOptions(allow_growth=gpu_stat)
 
     test_real = tf.compat.v1.placeholder(tf.float32, [1, None, None, 3], name='test')

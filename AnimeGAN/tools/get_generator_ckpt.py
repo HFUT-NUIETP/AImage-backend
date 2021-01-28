@@ -3,7 +3,7 @@ from tools.utils import *
 import os
 from net import generator
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 def parse_args():
     desc = "AnimeGAN"

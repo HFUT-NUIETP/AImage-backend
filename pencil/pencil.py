@@ -24,11 +24,28 @@ Lambda = 0.2
 texture_resize_ratio = 0.2
 texture_file_name = 'pencil/texture.jpg'
 
-def pencil_draw(path="pencil/input/input.jpg", gammaS=1, gammaI=1):
+def pencil_draw(path="pencil/input/input.jpg", quality = 2, gammaS=1, gammaI=1):
     name = path.rsplit("/")[-1].split(".")[0]
     suffix = path.rsplit("/")[-1].split(".")[1]
 
     imr = Image.open(path)
+     # resize
+    if (quality == 1):
+        width = imr.size[0]
+        height = imr.size[1]
+        rate = 250 / width
+        imr = imr.resize((int(width * rate), int(height * rate)),Image.ANTIALIAS)
+    elif (quality == 2):
+        width = imr.size[0]
+        height = imr.size[1]
+        rate = 500 / width
+        imr = imr.resize((int(width * rate), int(height * rate)),Image.ANTIALIAS)
+    else:
+        width = imr.size[0]
+        height = imr.size[1]
+        rate = 1000 / width
+        imr = imr.resize((int(width * rate), int(height * rate)),Image.ANTIALIAS)
+    
     type = "colour" if imr.mode == "RGB" else "black"
     im = imr.convert("L")
     J = np.array(im)
@@ -45,9 +62,28 @@ def pencil_draw(path="pencil/input/input.jpg", gammaS=1, gammaI=1):
 
     return name + suffix
 
-def color_draw(path="pencil/input/input.jpg", gammaS=1, gammaI=1):
+def color_draw(path="pencil/input/input.jpg", quality = 2, gammaS=1, gammaI=1):
     im = Image.open(path)
+    if (quality == 1):
+        # resize
+        width = im.size[0]
+        height = im.size[1]
+        rate = 250 / width
+        im = im.resize((int(width * rate), int(height * rate)),Image.ANTIALIAS)
+    elif (quality == 2):
+        # resize
+        width = im.size[0]
+        height = im.size[1]
+        rate = 500 / width
+        im = im.resize((int(width * rate), int(height * rate)),Image.ANTIALIAS)
+    else:
+        # resize
+        width = im.size[0]
+        height = im.size[1]
+        rate = 1000 / width
+        im = im.resize((int(width * rate), int(height * rate)),Image.ANTIALIAS)
 
+    
     if im.mode == 'RGB':
         ycbcr = im.convert('YCbCr')
         Iruv = np.ndarray((im.size[1], im.size[0], 3), 'u1', ycbcr.tobytes())
@@ -78,9 +114,9 @@ def color_draw(path="pencil/input/input.jpg", gammaS=1, gammaI=1):
 # -----------------utils-----------------
 # ---------------------------------------
 
-'''
-stitch begin
-'''
+
+# Function: stitch
+# author: Teng Li
 def hstitch(I, width):
     Istitched = I
     while Istitched.shape[1] < width:
@@ -119,13 +155,8 @@ def vstitch(I, height):
         )
     Istitched = Istitched[0: height, :]
     return Istitched
-'''
-stitch end
-'''
 
-'''
-util begin
-'''
+
 def im2double(I):
     Min = I.min()
     Max = I.max()
@@ -156,13 +187,10 @@ def rot90c(I):
         rI = rot90(rI)
     return rI
 
-'''
-util end
-'''
 
-'''
-natural histogram matching begin
-'''
+# Function: natural histogram matching begin
+# author: Teng Li
+
 def heaviside(x):
     return x if x >= 0 else 0
 
@@ -214,9 +242,8 @@ def natural_histogram_matching(I, type="black"):
     Iadjusted /= float(255)
     return Iadjusted
 
-'''
-natural histogram matching end
-'''
+# Function: Sketch generation
+# author: Teng Li
 def get_s(J, gammaS=1):    
     h, w = J.shape
     line_len_double = float(min(h, w)) / line_len_divisor
@@ -259,6 +286,8 @@ def get_s(J, gammaS=1):
     return S
 
 
+# Function: Tone generation
+# author: Teng Li
 def get_t(J, type, gammaI=1):
     Jadjusted = natural_histogram_matching(J, type=type) ** gammaI
 
@@ -273,57 +302,55 @@ def get_t(J, type, gammaI=1):
     Jtexture = vstitch(htexture, J.shape[0])
 
 # --------------ori-----------------
-    # size = J.shape[0] * J.shape[1]
+    size = J.shape[0] * J.shape[1]
 
-    # nzmax = 2 * (size-1)
-    # i = np.zeros((nzmax, 1))
-    # j = np.zeros((nzmax, 1))
-    # s = np.zeros((nzmax, 1))
-    # for m in range(1, nzmax+1):
-    #     i[m-1] = int(math.ceil((m+0.1) / 2)) - 1
-    #     j[m-1] = int(math.ceil((m-0.1) / 2)) - 1
-    #     s[m-1] = -2 * (m % 2) + 1
-    # dx = csr_matrix((s.T[0], (i.T[0], j.T[0])), shape=(size, size))
+    nzmax = 2 * (size-1)
+    i = np.zeros((nzmax, 1))
+    j = np.zeros((nzmax, 1))
+    s = np.zeros((nzmax, 1))
+    for m in range(1, nzmax+1):
+        i[m-1] = int(math.ceil((m+0.1) / 2)) - 1
+        j[m-1] = int(math.ceil((m-0.1) / 2)) - 1
+        s[m-1] = -2 * (m % 2) + 1
+    dx = csr_matrix((s.T[0], (i.T[0], j.T[0])), shape=(size, size))
 
-    # nzmax = 2 * (size - J.shape[1])
-    # i = np.zeros((nzmax, 1))
-    # j = np.zeros((nzmax, 1))
-    # s = np.zeros((nzmax, 1))
-    # for m in range(1, nzmax+1):
-    #     i[m-1, :] = int(math.ceil((m-1+0.1)/2) + J.shape[1] * (m % 2)) - 1
-    #     j[m-1, :] = math.ceil((m-0.1)/2) - 1
-    #     s[m-1, :] = -2 * (m % 2) + 1
-    # dy = csr_matrix((s.T[0], (i.T[0], j.T[0])), shape=(size, size))
-    # Jtexture1d = np.log(np.reshape(Jtexture.T, (1, Jtexture.size), order="f") + 0.01)
-    # Jtsparse = spdiags(Jtexture1d, 0, size, size)
-    # Jadjusted1d = np.log(np.reshape(Jadjusted.T, (1, Jadjusted.size), order="f").T + 0.01)
+    nzmax = 2 * (size - J.shape[1])
+    i = np.zeros((nzmax, 1))
+    j = np.zeros((nzmax, 1))
+    s = np.zeros((nzmax, 1))
+    for m in range(1, nzmax+1):
+        i[m-1, :] = int(math.ceil((m-1+0.1)/2) + J.shape[1] * (m % 2)) - 1
+        j[m-1, :] = math.ceil((m-0.1)/2) - 1
+        s[m-1, :] = -2 * (m % 2) + 1
+    dy = csr_matrix((s.T[0], (i.T[0], j.T[0])), shape=(size, size))
+    Jtexture1d = np.log(np.reshape(Jtexture.T, (1, Jtexture.size), order="f") + 0.01)
+    Jtsparse = spdiags(Jtexture1d, 0, size, size)
+    Jadjusted1d = np.log(np.reshape(Jadjusted.T, (1, Jadjusted.size), order="f").T + 0.01)
 
-    # nat = Jtsparse.T.dot(Jadjusted1d)   # lnJ(x)
-    # a = np.dot(Jtsparse.T, Jtsparse)
-    # b = dx.T.dot(dx)
-    # c = dy.T.dot(dy)
-    # mat = a + Lambda * (b + c)     # lnH(x)
-    # beta1d = spsolve(mat, nat)  # eq.8
-    # beta = np.reshape(beta1d, (J.shape[0], J.shape[1]), order="c")
+    nat = Jtsparse.T.dot(Jadjusted1d)   # lnJ(x)
+    a = np.dot(Jtsparse.T, Jtsparse)
+    b = dx.T.dot(dx)
+    c = dy.T.dot(dy)
+    mat = a + Lambda * (b + c)     # lnH(x)
+    beta1d = spsolve(mat, nat)  # eq.8
+    beta = np.reshape(beta1d, (J.shape[0], J.shape[1]), order="c")
 # --------------ori end-----------------
 
 # ---------------fast-------------------
-
-    hei, wid = J.shape
+    # hei, wid = J.shape
     # fx = np.array([1, -1])
-    fx = np.array([[1], [-1]])
-    fy = np.array([[1], [-1]])
-    otfFx = psf2otf(fx, [hei, wid])
-    otfFy = psf2otf(fy, [hei, wid])
-    DxDy = abs(otfFx)**2 + abs(otfFy)**2
-    LnH = np.log(Jtexture+0.0001)
-    LnJ = np.log(Jadjusted+0.0001)
-    Nom =  np.fft.fft2(LnJ / LnH)
-    Denom = 1 + gammaI * DxDy
-    # beta1d = np.fft.ifft2(Nom / Denom)
-    beta1d_real = np.fft.ifft2(Nom / Denom)
-    beta1d = np.real(beta1d_real)
-    beta = beta1d
+    # fy = np.array([[1], [-1]])
+    # otfFx = psf2otf(fx, [hei, wid])
+    # otfFy = psf2otf(fy, [hei, wid])
+    # DxDy = abs(otfFx)**2 + abs(otfFy)**2
+    # LnH = np.log(Jtexture+0.0001)
+    # LnJ = np.log(Jadjusted+0.0001)
+    # Nom =  np.fft.fft2(LnJ / LnH)
+    # Denom = 1 + gammaI * DxDy
+    # # beta1d = np.fft.ifft2(Nom / Denom)
+    # beta1d_real = np.fft.ifft2(Nom / Denom)
+    # beta1d = np.real(beta1d_real)
+    # beta = beta1d
 # --------------fast end----------------
 
     T = Jtexture ** beta    # eq.9
@@ -332,8 +359,6 @@ def get_t(J, type, gammaI=1):
 
     return T
 
-
-# # -------------fast utils---------------
 def zero_pad(image, shape, position='corner'):
     shape = np.asarray(shape, dtype=int)
     imshape = np.asarray(image.shape, dtype=int)
@@ -368,7 +393,7 @@ def psf2otf(psf, shape):
     otf = np.real_if_close(otf, tol=n_ops)
 
     return otf
-# #-----------fast utils end--------------
+
 
 def make_output_dir():
     if not os.path.exists(output):

@@ -1,12 +1,12 @@
 import argparse
-from tools.utils import *
+from AnimeGAN.tools.utils import *
 import os
 from tqdm import tqdm
 from glob import glob
 import time
 import numpy as np
-from net import generator
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+from AnimeGAN.net import generator
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 def parse_args():
     desc = "AnimeGAN"
@@ -28,7 +28,7 @@ def stats_graph(graph):
     # params = tf.profiler.profile(graph, options=tf.profiler.ProfileOptionBuilder.trainable_variables_parameter())
     print('FLOPs: {}'.format(flops.total_float_ops))
 
-def test(checkpoint_dir, test_dir, result_dir, if_adjust_brightness, img_size=[256,256]):
+def test_anime(checkpoint_dir, test_dir, result_dir, if_adjust_brightness, img_size=[256,256]):
     # tf.reset_default_graph()
     test_files = glob('{}/*.*'.format(test_dir))
 
@@ -77,4 +77,4 @@ def test(checkpoint_dir, test_dir, result_dir, if_adjust_brightness, img_size=[2
 if __name__ == '__main__':
     arg = parse_args()
     print(arg.checkpoint_dir)
-    test(arg.checkpoint_dir, arg.test_dir, arg.result_dir, arg.if_adjust_brightness)
+    test_anime(arg.checkpoint_dir, arg.test_dir, arg.result_dir, arg.if_adjust_brightness)
