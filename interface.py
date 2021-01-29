@@ -78,6 +78,40 @@ def anime():
 
     return img_output_base64
 
+
+@app.route('/oilpaint', methods = ['POST'])
+def oilpaint():
+	# img - base64-encoded image
+	# model - '0' for winter to summer
+	# model - '1' for summer to winter
+    img = request.values.get('img')
+    model = request.values.get('model')
+    
+    input_path = 'oilpaint/data/input/input.jpg'
+    output_path = 'oilpaint/data/output/output.jpg'
+    image_size = '256'
+
+    img_ori = base64.b64decode(img)
+    with open(input_path, 'wb+') as f:
+        f.write(img_ori)
+    if model == '0':
+        # winter2summer
+        nm_model = 'oilpaint/models/winter2summer.pb'
+    elif model == '1':
+        nm_model = 'oilpaint/models/summer2winter.pb'
+    else:
+        return -1
+    cmd = ['python', '--model', '--input', '--output', '--image_size']
+    cmd_run = cmd[0] + ' ' + 'oilpaint/main.py' + ' ' + cmd[1] + ' ' + nm_model + ' ' + cmd[2] + ' ' + input_path + ' ' + cmd[3] + ' ' + output_path + ' ' + cmd[4] + image_size
+    print(cmd_run)
+    os.system(cmd_run)
+
+    with open(output_path, 'rb') as f:
+        img_return = f.read()
+        img_return_decode = base64.b64encode(img_return)
+
+    return img_return_decode
+
 if __name__ == '__main__':
     CORS(app, supports_credentials=True)
     app.run(
@@ -85,4 +119,3 @@ if __name__ == '__main__':
             port = 8002,  
             debug = True 
             )
-
