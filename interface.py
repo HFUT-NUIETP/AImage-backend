@@ -4,12 +4,14 @@ from flask_cors import CORS
 import os
 import base64
 import tensorflow as tf
+import json
 
 from pencil.pencil import pencil_draw,color_draw
 from AnimeGAN.test import test_anime
+from cartoon.test import test_main
+from photo_resize import resize_600
 
 app = Flask(__name__)
-#CORS(app, resources=r'/*')
 
 @app.route('/pencil', methods = ['POST'])
 def pencil():
@@ -69,6 +71,8 @@ def anime():
     img_input = base64.b64decode(img)
     with open(source_dir + source_pic_name, 'wb') as f:
         f.write(img_input)
+
+    resize_600(source_dir + source_pic_name)
     
     test_anime(checkpoint_dir, source_dir, result_dir, if_adjust_brightness)
 
@@ -111,6 +115,36 @@ def oilpaint():
         img_return_decode = base64.b64encode(img_return)
 
     return img_return_decode
+
+
+@app.route('/cartoon', methods=['POST'])
+def cartoon():
+    img = request.values.get('img')
+
+    source_dir = 'cartoon/images/input/'
+    result_dir = 'cartoon/images/output/'
+    source_pic_name = 'photo.jpg'
+
+    img_input = base64.b64decode(img)
+    with open(source_dir + source_pic_name, 'wb+') as f:
+        f.write(img_input)
+    
+    status = test_main(source_dir + source_pic_name, result_dir + source_pic_name)
+
+    return_data = {}
+
+    if status == 0 :
+        with open(result_dir + source_pic_name, 'rb') as f:
+            img_output = f.read()
+            img_output_base64 = base64.b64encode(img_output)
+            return_data["status"]=status
+            return_data["img"]=str(img_output_base64, encoding='utf-8')
+        return json.dumps(return_data, ensure_ascii=False)
+    else:
+        # Can not detect face
+        return_data["status"]=status
+        return_data["img"]=""
+        return json.dumps(return_data, ensure_ascii=False)
 
 if __name__ == '__main__':
     CORS(app, supports_credentials=True)

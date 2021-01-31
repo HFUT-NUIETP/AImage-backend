@@ -1,0 +1,6 @@
+torch==1.7.1
+face-alignment
+cmake==3.12.0
+dlib==19.16
+onnxruntime
+torchvision
