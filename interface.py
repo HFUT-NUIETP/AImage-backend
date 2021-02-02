@@ -11,6 +11,9 @@ from AnimeGAN.test import test_anime
 from cartoon.test import test_main
 from photo_resize import resize_600
 
+import sys
+
+
 app = Flask(__name__)
 
 @app.route('/pencil', methods = ['POST'])
@@ -147,6 +150,13 @@ def cartoon():
         return json.dumps(return_data, ensure_ascii=False)
 
 if __name__ == '__main__':
+    f = open('server_log.log', 'a')
+    sys.stdout = f
+    sys.stderr = f
+    with open('cur_server_pid.tmp','w+') as f:
+        f.write(str(os.getpid()))
+        
+
     CORS(app, supports_credentials=True)
     app.run(
             host = '0.0.0.0',
