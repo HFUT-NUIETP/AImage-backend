@@ -2,3 +2,6 @@
 **/__pycache__/*.*
 **/*.tmp
 **/*.log
+**/__pycache__
+gaugan/checkpoints/
+gaugan/images/
