@@ -3,5 +3,9 @@
 **/*.tmp
 **/*.log
 **/__pycache__
-gaugan/checkpoints/
-gaugan/images/
+**/checkpoints/
+**/checkpoint/
+**/images/
+**/*.pth
+**/*.pt
+**/*.pb
