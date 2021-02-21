@@ -36,8 +36,8 @@ def convert_rgb_image_to_greyscale(input_file, output_file):
 
 # for test use
 def main():
-    in_file = "/home/iami/download/gaugan_input.png"
-    out_file = "output.png"
+    in_file = "gaugan/images/input/color_label/1.png"
+    out_file = "gaugan/images/input/val_label/1.png"
     convert_rgb_image_to_greyscale(in_file, out_file)
 
 

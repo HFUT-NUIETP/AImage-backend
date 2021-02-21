@@ -10,3 +10,11 @@
 **/*.pt
 **/*.pb
 **/__pycache__/
+StegaStamp/data/decode/upload.png
+StegaStamp/data/decode/save/code.txt
+StegaStamp/data/encode/upload_512.png
+StegaStamp/data/encode/upload_rec.png
+StegaStamp/data/encode/upload.png
+StegaStamp/data/encode/upload.txt
+StegaStamp/data/encode/save/encoded.png
+StegaStamp/saved_models/

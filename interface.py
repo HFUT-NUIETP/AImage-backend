@@ -12,6 +12,7 @@ from cartoon.test import test_main
 from photo_resize import resize_600
 from gaugan.test import doit
 from gaugan.color_to_grey import convert_rgb_image_to_greyscale
+from StegaStamp.md5_word_trans import save_word,resolve_md5
 
 import sys
 
@@ -192,6 +193,54 @@ def paint():
     return img_output_base64
 
 
+@app.route('/image_encry/encode', methods=['POST'])
+def encode():
+    img = request.values.get('img')
+    txt = request.values.get('txt')
+    img_ori = base64.b64decode(img)
+
+    pth_input = 'StegaStamp/data/encode/upload.png'
+    pth_save = 'StegaStamp/data/encode/save/'
+    with open(pth_input, 'wb+') as f:
+        f.write(img_ori)
+    str_secret = save_word(txt)
+    cmd = ['python', '--image', '--save_dir', '--secret']
+    pth_repo = 'StegaStamp/'
+    pth_ecd_function = pth_repo + 'encode_image.py'
+    cmd_run = cmd[0] + ' ' + pth_ecd_function + ' ' + cmd[1] + ' ' + pth_input \
+              + ' ' + cmd[2] + ' ' + pth_save + ' ' + cmd[3] + ' ' + '\'' + str_secret + '\''
+    print(cmd_run)
+    os.system(cmd_run)  # launch image watermark model
+    # to this step, encoded image is saved in ./save/decoded.png
+
+    pth_encoded_img = pth_save + 'encoded.png'
+    with open(pth_encoded_img, 'rb') as f:
+        img_ecd = f.read()
+        img_ecd_base64 = base64.b64encode(img_ecd)
+
+    return img_ecd_base64
+
+
+@app.route('/image_encry/decode', methods=['POST'])
+def decode():
+    img = request.values.get('img')
+    img_ori = base64.b64decode(img)
+
+    pth_upload = 'StegaStamp/data/decode/upload.png'
+    with open(pth_upload, 'wb+') as f:
+        f.write(img_ori)
+    cmd = ['python', '--image']
+    pth_dcd_function = 'StegaStamp/decode_image.py'
+    cmd_run = cmd[0] + ' ' + pth_dcd_function + ' ' + cmd[1] + ' ' + pth_upload
+    print(cmd_run)
+    os.system(cmd_run)
+    pth_code = 'StegaStamp/data/decode/save/code.txt'
+    with open(pth_code, 'r') as f:
+        str_code = f.read()
+    word = resolve_md5(str_code)
+    return word
+
+
 if __name__ == '__main__':
     f = open('server_log.log', 'a')
     sys.stdout = f
@@ -206,3 +255,4 @@ if __name__ == '__main__':
             port = 8002,  
             debug = True 
             )
+    
