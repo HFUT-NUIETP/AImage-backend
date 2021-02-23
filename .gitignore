@@ -18,3 +18,7 @@ StegaStamp/data/encode/upload.png
 StegaStamp/data/encode/upload.txt
 StegaStamp/data/encode/save/encoded.png
 StegaStamp/saved_models/
+.vscode/
+style_transfer/in/
+style_transfer/out/
+style_transfer/utils/models/

@@ -152,6 +152,7 @@ def cartoon():
         return_data["img"]=""
         return json.dumps(return_data, ensure_ascii=False)
 
+
 @app.route('/paint', methods=['POST'])
 def paint():
     img = request.values.get('img')
@@ -191,6 +192,28 @@ def paint():
         img_output_base64 = base64.b64encode(img_output)
 
     return img_output_base64
+
+
+@app.route('/style_transfer', methods=['POST'])
+def style_transfer():
+    img = request.values.get('img')
+    style_no = request.values.get('style_no')
+    img_ori = base64.b64decode(img)
+
+    pth_input = 'style_transfer/in/content.jpg'
+    pth_output = 'style_transfer/out/output.jpg'
+
+    with open(pth_input, 'wb+') as f:
+        f.write(img_ori)
+
+    cmd = 'cd style_transfer; /usr/bin/env /home/ubuntu/.conda/envs/style_transfer/bin/python main.py --style_no %s ; cd ..' % (style_no)
+    os.system(cmd)
+
+    with open(pth_output, 'rb') as f:
+        img_read = f.read()
+        img_base64 = base64.b64encode(img_read)
+
+    return img_base64
 
 
 @app.route('/image_encry/encode', methods=['POST'])
@@ -242,17 +265,15 @@ def decode():
 
 
 if __name__ == '__main__':
-    f = open('server_log.log', 'a')
-    sys.stdout = f
-    sys.stderr = f
-    with open('cur_server_pid.tmp','w+') as f:
-        f.write(str(os.getpid()))
+    # f = open('server_log.log', 'a')
+    # sys.stdout = f
+    # sys.stderr = f
+    # with open('cur_server_pid.tmp','w+') as f:
+    #     f.write(str(os.getpid()))
         
-
     CORS(app, supports_credentials=True)
     app.run(
             host = '0.0.0.0',
             port = 8002,  
             debug = True 
             )
-    
