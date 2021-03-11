@@ -10,6 +10,7 @@
 **/*.pt
 **/*.pb
 **/__pycache__/
+**/temp_*
 StegaStamp/data/decode/upload.png
 StegaStamp/data/decode/save/code.txt
 StegaStamp/data/encode/upload_512.png

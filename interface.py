@@ -5,6 +5,7 @@ import os
 import base64
 import tensorflow as tf
 import json
+import time
 
 from pencil.pencil import pencil_draw, color_draw
 from AnimeGAN.test import test_anime
@@ -185,7 +186,7 @@ def paint():
     restore_greyscale_to_rgb(greyscale_label_location,
                              restored_color_label_location)
 
-    result_pic_location = 'gaugan/images/output/mv/1.jpg'
+    result_pic_location = 'gaugan/images/output/mv/result-%s.jpg' % str(time.time())
     if generate_result_from_nv(restored_color_label_location, result_pic_location) == 1:
         result_pic_location = 'gaugan/images/output/label2coco/test_latest/images/synthesized_image/1.png'
         args = ['--name', 'label2coco',
@@ -290,7 +291,7 @@ if __name__ == '__main__':
     f = open('server_log.log', 'a')
     sys.stdout = f
     sys.stderr = f
-    with open('cur_server_pid.tmp','w+') as f:
+    with open('temp_cur_server_pid.tmp','w+') as f:
         f.write(str(os.getpid()))
 
     CORS(app, supports_credentials=True)
