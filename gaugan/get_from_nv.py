@@ -17,7 +17,8 @@ class run_request ():
         self.name = name
 
     def run(self):
-        print(self.request)
+        # print(self.request)
+        print("进入：" + self.name)
         self.tempfile_name = 'temp_%s.sh' % self.name
         with open(self.tempfile_name, 'w+') as f:
             f.write(self.request)
@@ -32,7 +33,7 @@ class run_request ():
 
 
 def generate_result_from_nv(input_file, output_file):
-
+    print('Trying to get from nv')
     template1 = r'''curl 'http://54.244.111.218:443/nvidia_gaugan_submit_map' \
   -H 'Connection: keep-alive' \
   -H 'Accept: */*' \
@@ -66,7 +67,7 @@ def generate_result_from_nv(input_file, output_file):
     match_obj = re.match(r"b'(.*)'", str(img_in_base64))
 
     name = time.strftime('%Y/%m/%d', time.localtime()) + \
-        ',1615379987878-845083770'
+        ',' + str(time.time())
     params = {
         'imageBase64': 'data:image/png;base64,' + match_obj.group(1),
         # 'imageBase64' : 'data:image/png;base64,' + img_in_base64,
