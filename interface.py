@@ -11,7 +11,8 @@ from AnimeGAN.test import test_anime
 from cartoon.test import test_main
 from photo_resize import resize_600
 from gaugan.test import doit
-from gaugan.color_to_grey import convert_rgb_image_to_greyscale
+from gaugan.color_to_grey import *
+from gaugan.get_from_nv import generate_result_from_nv
 from StegaStamp.md5_word_trans import save_word,resolve_md5
 
 import sys
@@ -27,6 +28,7 @@ def pencil():
     gammaI = request.values.get('i')
     quality = request.values.get('q')
     img_input = base64.b64decode(img)
+
     with open('pencil/input/input.jpg', 'wb') as f:
         f.write(img_input)
     cmd = ['python ',' --p ', ' --c ', ' -s ', ' -i ', ' -q ']
@@ -161,32 +163,37 @@ def paint():
     label_dir = source_dir + 'val_label/'
     color_label_dir = source_dir + 'color_label/'
     result_dir = 'gaugan/images/output/'
-    result_pic_location = 'gaugan/images/output/label2coco/test_latest/images/synthesized_image/1.png'
     source_pic_name = '1.png'
+    greyscale_label_location = label_dir + source_pic_name
+    restored_color_label_location = source_dir + 'restored_color_label/' + source_pic_name
 
     img_input = base64.b64decode(img)
     with open(color_label_dir + source_pic_name, 'wb+') as f:
         f.write(img_input)
 
-    convert_rgb_image_to_greyscale(color_label_dir + source_pic_name, label_dir + source_pic_name)
+    convert_rgb_image_to_greyscale(color_label_dir + source_pic_name, greyscale_label_location)
+    restore_greyscale_to_rgb(greyscale_label_location, restored_color_label_location)
 
-    args = ['--name', 'label2coco',
-           '--checkpoints_dir', 'gaugan/checkpoints',
-           '--load_size', '512',
-           '--crop_size', '512',
-           '--aspect_ratio', '1.0',
-           '--preprocess_mode', 'resize_and_crop',
-           '--dataset_mode', 'custom',
-           '--gpu_ids', '-1',
-           '--label_dir', source_dir + 'val_label',
-           '--image_dir', source_dir + 'val_img',
-           '--results_dir', result_dir,
-           '--label_nc', '182',
-           '--gpu_ids', '-1',
-           '--no_instance',
-           '--no_pairing_check']
-    doit(args)
-    print('finish')
+    result_pic_location = 'gaugan/images/output/mv/1.jpg'
+    if generate_result_from_nv(restored_color_label_location, result_pic_location) == 1:
+        result_pic_location = 'gaugan/images/output/label2coco/test_latest/images/synthesized_image/1.png'
+        args = ['--name', 'label2coco',
+            '--checkpoints_dir', 'gaugan/checkpoints',
+            '--load_size', '256',
+            '--crop_size', '256',
+            '--aspect_ratio', '1.0',
+            '--preprocess_mode', 'resize_and_crop',
+            '--dataset_mode', 'custom',
+            '--gpu_ids', '-1',
+            '--label_dir', source_dir + 'val_label',
+            '--image_dir', source_dir + 'val_img',
+            '--results_dir', result_dir,
+            '--label_nc', '182',
+            '--gpu_ids', '-1',
+            '--no_instance',
+            '--no_pairing_check']
+        doit(args)
+        print('generate finish')
     with open(result_pic_location, 'rb') as f:
         img_output = f.read()
         img_output_base64 = base64.b64encode(img_output)
@@ -277,3 +284,4 @@ if __name__ == '__main__':
             port = 8002,  
             debug = True 
             )
+    
