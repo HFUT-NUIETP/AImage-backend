@@ -27,4 +27,5 @@ bash, curl, v2ray
 
 ## 代理
 http_proxy='127.0.0.1:8889'
+
 https_proxy='127.0.0.1:8889'
