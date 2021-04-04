@@ -21,6 +21,11 @@ import sys
 
 app = Flask(__name__)
 
+@app.route('/test', methods=['GET'])
+def test():
+    s_NORMAL = "0"
+    s_DEBUG = "1"
+    return s_DEBUG
 
 @app.route('/pencil', methods=['POST'])
 def pencil():
@@ -29,6 +34,8 @@ def pencil():
     gammaS = request.values.get('s')
     gammaI = request.values.get('i')
     quality = request.values.get('q')
+
+    # print("img:"+str(img))
     img_input = base64.b64decode(img)
 
     with open('pencil/input/input.jpg', 'wb') as f:
@@ -67,9 +74,6 @@ def pencil():
     return img_output_base64
 
 
-@app.route('/test', methods=['GET'])
-def test():
-    return 'hello_3'
 
 
 @app.route('/anime', methods=['POST'])
@@ -244,6 +248,7 @@ def encode():
     txt = request.values.get('txt')
     img_ori = base64.b64decode(img)
 
+    print(txt)
     pth_input = 'StegaStamp/data/encode/upload.png'
     pth_save = 'StegaStamp/data/encode/save/'
     with open(pth_input, 'wb+') as f:
