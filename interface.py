@@ -35,11 +35,13 @@ def makedirs_if_not_exist(str_dir):
     if not os.path.exists(str_dir):
         os.makedirs(str_dir) 
 
+
 @app.route('/test', methods=['GET'])
 def test():
     s_NORMAL = "0"
     s_DEBUG = "1"
     return s_DEBUG
+
 
 @app.route('/pencil', methods=['POST'])
 def pencil():
@@ -352,7 +354,7 @@ def decode():
     os.system(cmd_run)
     pth_code = dir_save + 'code.txt'
     if not os.path.exists(pth_code):
-        str_no_copyright_found = ''' {"author":"(图像中无版权信息)","date":"(空)","contact":"空)","copyright":"空)","area":"空)"} '''
+        str_no_copyright_found = ''' {"author":"(图像中无版权信息)","date":"(空)","contact":"(空)","copyright":"(空)","area":"(空)"} '''
         return str_no_copyright_found
     with open(pth_code, 'r') as f:
         str_code = f.read()
@@ -372,4 +374,3 @@ if __name__ == '__main__':
         host='0.0.0.0',
         port=8002,
         debug=True
-    )
