@@ -21,6 +21,20 @@ import sys
 
 app = Flask(__name__)
 
+def generate_dir_name():
+    name = time.strftime('%Y-%m-%d', time.localtime())
+    return name
+
+
+def generate_file_name(str_date):
+    name = str_date + ',' + str(time.time()).replace('.','-')
+    return name
+
+
+def makedirs_if_not_exist(str_dir):
+    if not os.path.exists(str_dir):
+        os.makedirs(str_dir) 
+
 @app.route('/test', methods=['GET'])
 def test():
     s_NORMAL = "0"
@@ -38,9 +52,18 @@ def pencil():
     # print("img:"+str(img))
     img_input = base64.b64decode(img)
 
-    with open('pencil/input/input.jpg', 'wb') as f:
+    str_date = generate_dir_name()
+    str_time = generate_file_name(str_date)
+
+    dir_input = 'pencil/userData/input/' + str_date + '/'
+    pth_input = dir_input + str_time + '.jpg'
+    dir_output = 'pencil/userData/output/' + str_date + '/'
+    makedirs_if_not_exist(dir_input)
+    makedirs_if_not_exist(dir_output)
+
+    with open(pth_input, 'wb') as f:
         f.write(img_input)
-    cmd = ['python ', ' --p ', ' --c ', ' -s ', ' -i ', ' -q ']
+    cmd = ['python ', ' --p ', ' --c ', ' -s ', ' -i ', ' -q ', ' -img ', ' --output_dir ']
     # cmd----[0]------ [1]------[2]-----[3]------[4]-----[5]
     '''
     --p for graphic
@@ -52,13 +75,13 @@ def pencil():
     if (color == 'True'):
         # true for colorful pencil
         cmd_run = cmd[0] + pth_function + cmd[2] + cmd[3] + \
-            gammaS + cmd[4] + gammaI + cmd[5] + quality
-        pth_output = 'pencil/output/input_color.jpg'
+            gammaS + cmd[4] + gammaI + cmd[5] + quality + cmd[6] + pth_input + cmd[7] + dir_output
+        pth_output = dir_output + str_time + '_color.jpg'
     else:
         # false for graphic pencil
         cmd_run = cmd[0] + pth_function + cmd[1] + cmd[3] + \
-            gammaS + cmd[4] + gammaI + cmd[5] + quality
-        pth_output = 'pencil/output/input_pencil.jpg'
+            gammaS + cmd[4] + gammaI + cmd[5] + quality + cmd[6] + pth_input + cmd[7] + dir_output
+        pth_output = dir_output + str_time + '_pencil.jpg'
 
     print("------------Debug--------------")
     print(color)
@@ -74,27 +97,36 @@ def pencil():
     return img_output_base64
 
 
-
-
 @app.route('/anime', methods=['POST'])
 def anime():
     img = request.values.get('img')
 
     checkpoint_dir = 'AnimeGAN/checkpoint/'
-    source_dir = 'AnimeGAN/data/input/'
-    result_dir = 'AnimeGAN/data/output/'
+
+    str_date = generate_dir_name()
+    str_time = generate_file_name(str_date)
+
+    dir_input = 'AnimeGAN/userData/input/' + str_date + '/' + str_time + '/'
+    pth_input = dir_input + 'anime.jpg'
+    dir_output = 'AnimeGAN/userData/output/' + str_date + '/' + str_time + '/'
+    pth_output = dir_output + 'anime.jpg'
+    makedirs_if_not_exist(dir_input)
+    makedirs_if_not_exist(dir_output)
+
     if_adjust_brightness = True
-    source_pic_name = 'anime_input.jpg'
+    # source_dir = 'AnimeGAN/data/input/'
+    # result_dir = 'AnimeGAN/data/output/'
+    # source_pic_name = 'anime_input.jpg'
 
     img_input = base64.b64decode(img)
-    with open(source_dir + source_pic_name, 'wb') as f:
+    with open(pth_input, 'wb') as f:
         f.write(img_input)
 
-    resize_600(source_dir + source_pic_name)
+    resize_600(pth_input)
 
-    test_anime(checkpoint_dir, source_dir, result_dir, if_adjust_brightness)
+    test_anime(checkpoint_dir, dir_input, dir_output, if_adjust_brightness)
 
-    with open(result_dir + source_pic_name, 'rb') as f:
+    with open(pth_output, 'rb') as f:
         img_output = f.read()
         img_output_base64 = base64.b64encode(img_output)
 
@@ -109,12 +141,22 @@ def oilpaint():
     img = request.values.get('img')
     model = request.values.get('model')
 
-    input_path = 'oilpaint/data/input/input.jpg'
-    output_path = 'oilpaint/data/output/output.jpg'
+    str_date = generate_dir_name()
+    str_time = generate_file_name(str_date)
+
+    dir_input = 'oilpaint/userData/input/' + str_date + '/'
+    pth_input = dir_input + str_time + '.jpg'
+    dir_output = 'oilpaint/userData/output/' + str_date + '/'
+    pth_output = dir_output + str_time + '.jpg'
+    makedirs_if_not_exist(dir_input)
+    makedirs_if_not_exist(dir_output)
+
+    # input_path = 'oilpaint/data/input/input.jpg'
+    # output_path = 'oilpaint/data/output/output.jpg'
     image_size = '256'
 
     img_ori = base64.b64decode(img)
-    with open(input_path, 'wb+') as f:
+    with open(pth_input, 'wb+') as f:
         f.write(img_ori)
     if model == '0':
         # winter2summer
@@ -125,12 +167,12 @@ def oilpaint():
         return -1
     cmd = ['python', '--model', '--input', '--output', '--image_size']
     cmd_run = cmd[0] + ' ' + 'oilpaint/main.py' + ' ' + cmd[1] + ' ' + nm_model + ' ' + \
-        cmd[2] + ' ' + input_path + ' ' + cmd[3] + \
-        ' ' + output_path + ' ' + cmd[4] + image_size
+        cmd[2] + ' ' + pth_input + ' ' + cmd[3] + \
+        ' ' + pth_output + ' ' + cmd[4] + image_size
     print(cmd_run)
     os.system(cmd_run)
 
-    with open(output_path, 'rb') as f:
+    with open(pth_output, 'rb') as f:
         img_return = f.read()
         img_return_decode = base64.b64encode(img_return)
 
@@ -225,14 +267,24 @@ def style_transfer():
 
     print('style_no' + str(style_no))
 
-    pth_input = 'style_transfer/in/content.jpg'
-    pth_output = 'style_transfer/out/output.jpg'
+    str_date = generate_dir_name()
+    str_time = generate_file_name(str_date)
+
+    dir_input = 'style_transfer/userData/input/' + str_date + '/'
+    pth_input = dir_input + str_time + '.jpg'
+    dir_output = 'style_transfer/userData/output/' + str_date + '/'
+    pth_output = dir_output + str_time + '.jpg'
+    makedirs_if_not_exist(dir_input)
+    makedirs_if_not_exist(dir_output)
+
+    # pth_input = 'style_transfer/in/content.jpg'
+    # pth_output = 'style_transfer/out/output.jpg'
 
     with open(pth_input, 'wb+') as f:
         f.write(img_ori)
 
-    cmd = 'cd style_transfer; /usr/bin/env /home/ubuntu/.conda/envs/style_transfer/bin/python main.py --style_no %s ; cd ..' % (
-        style_no)
+    cmd = 'cd style_transfer; /usr/bin/env /home/ubuntu/.conda/envs/style_transfer/bin/python main.py --style_no %s --path_content %s --path_output %s; cd ..' % (
+        style_no, pth_input.split('style_transfer/')[1], pth_output.split('style_transfer/')[1])
     os.system(cmd)
 
     with open(pth_output, 'rb') as f:
@@ -249,8 +301,14 @@ def encode():
     img_ori = base64.b64decode(img)
 
     print(txt)
-    pth_input = 'StegaStamp/data/encode/upload.png'
-    pth_save = 'StegaStamp/data/encode/save/'
+    str_date = generate_dir_name()
+    str_time = generate_file_name(str_date)
+    dir_input = 'StegaStamp/userData/encode/upload/' + str_date + '/'
+    pth_input = dir_input + str_time + '.png'
+    dir_save = 'StegaStamp/userData/encode/save/' + str_date + '/' + str_time + '/'
+    makedirs_if_not_exist(dir_input)
+    makedirs_if_not_exist(dir_save)
+
     with open(pth_input, 'wb+') as f:
         f.write(img_ori)
     str_secret = save_word(txt)
@@ -258,13 +316,13 @@ def encode():
     pth_repo = 'StegaStamp/'
     pth_ecd_function = pth_repo + 'encode_image.py'
     cmd_run = cmd[0] + ' ' + pth_ecd_function + ' ' + cmd[1] + ' ' + pth_input \
-        + ' ' + cmd[2] + ' ' + pth_save + ' ' + \
+        + ' ' + cmd[2] + ' ' + dir_save + ' ' + \
         cmd[3] + ' ' + '\'' + str_secret + '\''
     print(cmd_run)
     os.system(cmd_run)  # launch image watermark model
     # to this step, encoded image is saved in ./save/decoded.png
 
-    pth_encoded_img = pth_save + 'encoded.png'
+    pth_encoded_img = dir_save + 'encoded.png'
     with open(pth_encoded_img, 'rb') as f:
         img_ecd = f.read()
         img_ecd_base64 = base64.b64encode(img_ecd)
@@ -277,15 +335,25 @@ def decode():
     img = request.values.get('img')
     img_ori = base64.b64decode(img)
 
-    pth_upload = 'StegaStamp/data/decode/upload.png'
+    str_date = generate_dir_name()
+    str_time = generate_file_name(str_date)
+    dir_upload = 'StegaStamp/userData/decode/upload/' + str_date + '/'
+    pth_upload = dir_upload + str_time + '.png'
+    dir_save = 'StegaStamp/userData/decode/save/' + str_date + '/' + str_time + '/'
+    makedirs_if_not_exist(dir_upload)
+    makedirs_if_not_exist(dir_save)
+
     with open(pth_upload, 'wb+') as f:
         f.write(img_ori)
-    cmd = ['python', '--image']
+    cmd = ['python', '--image','--result_dir']
     pth_dcd_function = 'StegaStamp/decode_image.py'
-    cmd_run = cmd[0] + ' ' + pth_dcd_function + ' ' + cmd[1] + ' ' + pth_upload
+    cmd_run = cmd[0] + ' ' + pth_dcd_function + ' ' + cmd[1] + ' ' + pth_upload + ' ' + cmd[2] + ' ' + dir_save
     print(cmd_run)
     os.system(cmd_run)
-    pth_code = 'StegaStamp/data/decode/save/code.txt'
+    pth_code = dir_save + 'code.txt'
+    if not os.path.exists(pth_code):
+        str_no_copyright_found = ''' {"author":"(图像中无版权信息)","date":"(空)","contact":"空)","copyright":"空)","area":"空)"} '''
+        return str_no_copyright_found
     with open(pth_code, 'r') as f:
         str_code = f.read()
     word = resolve_md5(str_code)
@@ -293,9 +361,9 @@ def decode():
 
 
 if __name__ == '__main__':
-    f = open('server_log.log', 'a')
-    sys.stdout = f
-    sys.stderr = f
+    # f = open('server_log.log', 'a')
+    # sys.stdout = f
+    # sys.stderr = f
     with open('temp_cur_server_pid.tmp','w+') as f:
         f.write(str(os.getpid()))
 

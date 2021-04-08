@@ -24,7 +24,7 @@ Lambda = 0.2
 texture_resize_ratio = 0.2
 texture_file_name = 'pencil/texture.jpg'
 
-def pencil_draw(path="pencil/input/input.jpg", quality = 2, gammaS=1, gammaI=1):
+def pencil_draw(path="pencil/input/input.jpg", quality = 2, gammaS=1, gammaI=1, path_output = output):
     name = path.rsplit("/")[-1].split(".")[0]
     suffix = path.rsplit("/")[-1].split(".")[1]
 
@@ -58,11 +58,11 @@ def pencil_draw(path="pencil/input/input.jpg", quality = 2, gammaS=1, gammaI=1):
     ## save image
     # save_output(Image.fromarray(S * 255), name + "_s", suffix)
     # save_output(Image.fromarray(T * 255), name + "_t", suffix)
-    save_output(img, name + "_pencil", suffix)
+    save_output(img, name + "_pencil", suffix, path_output)
 
     return name + suffix
 
-def color_draw(path="pencil/input/input.jpg", quality = 2, gammaS=1, gammaI=1):
+def color_draw(path="pencil/input/input.jpg", quality = 2, gammaS=1, gammaI=1, path_output = output):
     im = Image.open(path)
     if (quality == 1):
         # resize
@@ -108,7 +108,7 @@ def color_draw(path="pencil/input/input.jpg", quality = 2, gammaS=1, gammaI=1):
 
     # save_output(Image.fromarray(S * 255), name + "_s", suffix)
     # save_output(Image.fromarray(T * 255), name + "_t", suffix)
-    save_output(img, name + "_color", suffix)
+    save_output(img, name + "_color", suffix, path_output)
 
 # ---------------------------------------
 # -----------------utils-----------------
@@ -395,15 +395,16 @@ def psf2otf(psf, shape):
     return otf
 
 
-def make_output_dir():
-    if not os.path.exists(output):
-        os.mkdir(output)
+def make_output_dir(path):
+    if not os.path.exists(path):
+        os.mkdir(path)
 
 
-def save_output(img, name, suffix):
+def save_output(img, name, suffix, path_output):
     if img.mode != 'RGB':
         img = img.convert('RGB')
-    make_output_dir()
-    name = os.path.join(output, name)
+    make_output_dir(path_output)
+    name = os.path.join(path_output, name)
     filename = "{0}.{1}".format(name, suffix)
+    print('filename:' + filename)
     img.save(filename)

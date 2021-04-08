@@ -3,6 +3,7 @@
 
 from pencil import pencil_draw,color_draw
 import argparse
+import os
 
 parser = argparse.ArgumentParser(description='Pencil Drawing Program. '
                                              'You will get the productions at the output folder.')
@@ -18,6 +19,7 @@ parser.add_argument('-i', dest='gammaI', type=float, default=1,
                     help='Larger when you want the color of productions deeper, default value is 1.')
 parser.add_argument('-q', dest='quality', type=int, default=2,
                     help='Image output quality.')
+parser.add_argument('--output_dir', dest='output_dir', type=str, default=os.path.join(os.path.dirname(__file__), 'output'), help='Specify output dir.')
 args = parser.parse_args()
 
 if not args.p and not args.c:
@@ -27,9 +29,9 @@ import time
 time_start=time.time()
 
 if args.p:
-    pencil_draw(path=args.image, quality = args.quality, gammaS=args.gammaS, gammaI=args.gammaI)
+    pencil_draw(path=args.image, quality = args.quality, gammaS=args.gammaS, gammaI=args.gammaI, path_output=args.output_dir)
 if args.c:
-    color_draw(path=args.image, quality = args.quality, gammaS=args.gammaS, gammaI=args.gammaI)
+    color_draw(path=args.image, quality = args.quality, gammaS=args.gammaS, gammaI=args.gammaI, path_output=args.output_dir)
 
 time_end=time.time()
 print('time cost -> ', time_end - time_start)
