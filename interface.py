@@ -363,9 +363,9 @@ def decode():
 
 
 if __name__ == '__main__':
-    # f = open('server_log.log', 'a')
-    # sys.stdout = f
-    # sys.stderr = f
+    f = open('server_log.log', 'a')
+    sys.stdout = f
+    sys.stderr = f
     with open('temp_cur_server_pid.tmp','w+') as f:
         f.write(str(os.getpid()))
 
@@ -374,3 +374,4 @@ if __name__ == '__main__':
         host='0.0.0.0',
         port=8002,
         debug=True
+    )
