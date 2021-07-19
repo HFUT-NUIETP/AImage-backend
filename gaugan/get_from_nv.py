@@ -42,16 +42,17 @@ class run_request ():
 
 def generate_result_from_nv(input_file, output_file):
     print('Trying to get from nv')
+    # 54.244.111.218:443
     template1 = r'''export http_proxy='127.0.0.1:8889'
     export https_proxy=$http_proxy
     echo "Using proxy at $http_proxy"
-    curl 'http://54.244.111.218:443/nvidia_gaugan_submit_map' \
+    curl 'http://54.190.129.191:443/nvidia_gaugan_submit_map' \
   -H 'Connection: keep-alive' \
   -H 'Accept: */*' \
   -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4400.0 Safari/537.36 Edg/90.0.782.0' \
   -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
-  -H 'Origin: http://nvidia-research-mingyuliu.com' \
-  -H 'Referer: http://nvidia-research-mingyuliu.com/' \
+  -H 'Origin: http://34.216.122.111' \
+  -H 'Referer: http://34.216.122.111/' \
   -H 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6' \
   --data-raw '__DATA__' \
   --compressed \
@@ -59,13 +60,13 @@ def generate_result_from_nv(input_file, output_file):
     template2 = r"""export http_proxy='127.0.0.1:8889'
     export https_proxy=$http_proxy
     echo "Using proxy at $http_proxy"
-    curl 'http://54.244.111.218:443/nvidia_gaugan_receive_image' \
+    curl 'http://54.190.129.191:443/nvidia_gaugan_receive_image' \
   -H 'Connection: keep-alive' \
   -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4400.0 Safari/537.36 Edg/90.0.782.0' \
   -H 'Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryEls912uuOpbLfYzg' \
   -H 'Accept: */*' \
-  -H 'Origin: http://nvidia-research-mingyuliu.com' \
-  -H 'Referer: http://nvidia-research-mingyuliu.com/' \
+  -H 'Origin: http://34.216.122.111' \
+  -H 'Referer: http://34.216.122.111/' \
   -H 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6' \
   --data-raw $'------WebKitFormBoundaryEls912uuOpbLfYzg\r\nContent-Disposition: form-data; name="name"\r\n\r\n__NAME__\r\n------WebKitFormBoundaryEls912uuOpbLfYzg\r\nContent-Disposition: form-data; name="style_name"\r\n\r\nrandom\r\n------WebKitFormBoundaryEls912uuOpbLfYzg--\r\n' \
   --compressed \
@@ -97,7 +98,7 @@ def generate_result_from_nv(input_file, output_file):
     th_req2 = run_request(request2, 'request2-'+name.split(',')[1])
 
     th_req1.run()
-    time.sleep(4.0)
+    time.sleep(2.0)
     th_req2.run()
 
     th_req1.stop()
