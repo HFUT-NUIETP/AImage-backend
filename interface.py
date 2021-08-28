@@ -13,13 +13,16 @@ from cartoon.test import test_main
 from photo_resize import resize_600
 from gaugan.test import doit
 from gaugan.color_to_grey import *
-from gaugan.get_from_nv import generate_result_from_nv
+from gaugan.get_from_nv import generate_result_from_nv, get_urls
 from StegaStamp.md5_word_trans import save_word, resolve_md5
 
 import sys
 
 
 app = Flask(__name__)
+
+cur_url_id = 0
+
 
 def generate_dir_name():
     name = time.strftime('%Y-%m-%d', time.localtime())
@@ -235,7 +238,20 @@ def paint():
                              restored_color_label_location)
 
     result_pic_location = 'gaugan/images/output/mv/result-%s.jpg' % str(time.time())
-    if generate_result_from_nv(restored_color_label_location, result_pic_location) == 1:
+
+    global cur_url_id
+    nv_urls = get_urls()
+    max_tries = len(nv_urls)
+    status_nv = 0
+    while max_tries > 0:
+        status_nv = generate_result_from_nv(restored_color_label_location, result_pic_location, nv_urls[cur_url_id])
+        if(status_nv == 0):
+            break;
+        else:
+            cur_url_id = (cur_url_id + 1) % len(nv_urls)
+        max_tries = max_tries - 1
+    
+    if status_nv == 1:
         result_pic_location = 'gaugan/images/output/label2coco/test_latest/images/synthesized_image/1.png'
         args = ['--name', 'label2coco',
                 '--checkpoints_dir', 'gaugan/checkpoints',
@@ -300,9 +316,9 @@ def style_transfer():
 def encode():
     img = request.values.get('img')
     txt = request.values.get('txt')
+    
     img_ori = base64.b64decode(img)
 
-    print(txt)
     str_date = generate_dir_name()
     str_time = generate_file_name(str_date)
     dir_input = 'StegaStamp/userData/encode/upload/' + str_date + '/'
@@ -364,8 +380,8 @@ def decode():
 
 if __name__ == '__main__':
     f = open('server_log.log', 'a')
-    sys.stdout = f
-    sys.stderr = f
+    # sys.stdout = f
+    # sys.stderr = f
     with open('temp_cur_server_pid.tmp','w+') as f:
         f.write(str(os.getpid()))
 
